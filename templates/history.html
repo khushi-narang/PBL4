@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Translation History - Indian Sign Language Translator</title>
+    <link rel="stylesheet" href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
+</head>
+<body>
+    <div class="container mt-4">
+        <header class="mb-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <h1 class="display-5">Translation History</h1>
+                <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left"></i> Back to Translator
+                </a>
+            </div>
+            <p class="lead">View your past voice-to-ISL translations</p>
+        </header>
+
+        <div class="card">
+            <div class="card-header">
+                <div class="row">
+                    <div class="col-md-8">
+                        <h5 class="mb-0">Recent Translations</h5>
+                    </div>
+                    <div class="col-md-4">
+                        <form action="{{ url_for('history') }}" method="get" class="d-flex">
+                            <input type="text" name="search" class="form-control form-control-sm me-2" 
+                                   placeholder="Search translations" value="{{ search }}">
+                            <button type="submit" class="btn btn-sm btn-outline-primary">Search</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                {% if translations %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Date/Time</th>
+                                <th>Original Text</th>
+                                <th>ISL Gloss</th>
+                                <th>Status</th>
+                                <th>Speed (ms)</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for translation in translations %}
+                            <tr>
+                                <td>{{ translation.timestamp.strftime('%Y-%m-%d %H:%M') }}</td>
+                                <td>{{ translation.original_text }}</td>
+                                <td>{{ translation.gloss_text }}</td>
+                                <td>
+                                    {% if translation.is_successful %}
+                                    <span class="badge bg-success">Success</span>
+                                    {% else %}
+                                    <span class="badge bg-danger">Failed</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ "%.2f"|format(translation.translation_time or 0) }}</td>
+                                <td>
+                                    <a href="{{ url_for('view_translation', translation_id=translation.id) }}" 
+                                       class="btn btn-sm btn-outline-info">
+                                        <i class="bi bi-eye"></i> View
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-info">
+                    No translations found. Try making some translations first.
+                </div>
+                {% endif %}
+            </div>
+            <div class="card-footer">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        Showing {{ translations|length }} translation(s)
+                    </div>
+                    {% if total_pages > 1 %}
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination pagination-sm mb-0">
+                            {% if page > 1 %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('history', page=page-1, search=search) }}">Previous</a>
+                            </li>
+                            {% endif %}
+                            
+                            {% for p in range(1, total_pages + 1) %}
+                            <li class="page-item {% if p == page %}active{% endif %}">
+                                <a class="page-link" href="{{ url_for('history', page=p, search=search) }}">{{ p }}</a>
+                            </li>
+                            {% endfor %}
+                            
+                            {% if page < total_pages %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('history', page=page+1, search=search) }}">Next</a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

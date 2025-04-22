@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Custom Data - ISL Translator</title>
+    <link rel="stylesheet" href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
+    <style>
+        .file-drop-area {
+            border: 2px dashed var(--bs-border-color);
+            border-radius: 0.5rem;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        .file-drop-area.highlight {
+            border-color: var(--bs-primary);
+            background-color: rgba(13,110,253,0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <header class="text-center mb-5">
+            <h1 class="display-4">Upload Custom Data</h1>
+            <p class="lead">Add your own translations and videos to the ISL Translator</p>
+            <div class="mt-3">
+                <a href="{{ url_for('index') }}" class="btn btn-outline-secondary me-2">
+                    <i class="bi bi-house-door"></i> Home
+                </a>
+                <a href="{{ url_for('history') }}" class="btn btn-outline-secondary">
+                    <i class="bi bi-clock-history"></i> History
+                </a>
+            </div>
+        </header>
+
+        <div class="row">
+            <!-- Gloss Translations Upload -->
+            <div class="col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="bi bi-translate"></i> Upload Gloss Translations
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form action="{{ url_for('upload_gloss_csv') }}" method="post" enctype="multipart/form-data">
+                            <div class="mb-3">
+                                <p>Upload a CSV file with English to ISL gloss mappings:</p>
+                                <div class="file-drop-area mb-3" id="glossDropArea">
+                                    <i class="bi bi-cloud-arrow-up fs-1 text-muted"></i>
+                                    <p class="mt-2">Drag & drop your CSV file here or click to browse</p>
+                                    <input type="file" name="gloss_csv" id="glossCsvFile" accept=".csv" class="visually-hidden">
+                                </div>
+                                <div id="glossFileName" class="small text-muted"></div>
+                            </div>
+                            
+                            <div class="alert alert-info">
+                                <i class="bi bi-info-circle me-2"></i>
+                                <strong>CSV Format:</strong> Two columns with English text in first column and ISL gloss in second column.
+                                
+                                <div class="mt-2">
+                                    <pre class="mb-0 small">english,gloss
+hello,NAMASTE
+thank you,THANK-YOU</pre>
+                                </div>
+                            </div>
+                            
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-upload me-2"></i> Upload Translations
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Videos Upload -->
+            <div class="col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="bi bi-camera-video"></i> Upload Sign Videos
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form action="{{ url_for('upload_videos') }}" method="post" enctype="multipart/form-data">
+                            <div class="mb-3">
+                                <p>Upload your sign language videos:</p>
+                                <div class="file-drop-area mb-3" id="videosDropArea">
+                                    <i class="bi bi-camera-video fs-1 text-muted"></i>
+                                    <p class="mt-2">Drag & drop your videos here or click to browse</p>
+                                    <input type="file" name="videos[]" id="videoFiles" accept="video/*" multiple class="visually-hidden">
+                                </div>
+                                <div id="videoFileNames" class="small text-muted"></div>
+                            </div>
+                            
+                            <div class="alert alert-info">
+                                <i class="bi bi-info-circle me-2"></i>
+                                <strong>Note:</strong> After uploading videos, use the "Video Mapping CSV" section below to map videos to gloss words.
+                            </div>
+                            
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-upload me-2"></i> Upload Videos
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Video Mapping CSV -->
+        <div class="row">
+            <div class="col-md-12 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="bi bi-link"></i> Map Videos to Gloss Words
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form action="{{ url_for('upload_video_mapping_csv') }}" method="post" enctype="multipart/form-data">
+                            <div class="mb-3">
+                                <p>Upload a CSV file mapping gloss words to video filenames:</p>
+                                <div class="file-drop-area mb-3" id="mappingDropArea">
+                                    <i class="bi bi-table fs-1 text-muted"></i>
+                                    <p class="mt-2">Drag & drop your CSV file here or click to browse</p>
+                                    <input type="file" name="mapping_csv" id="mappingCsvFile" accept=".csv" class="visually-hidden">
+                                </div>
+                                <div id="mappingFileName" class="small text-muted"></div>
+                            </div>
+                            
+                            <div class="alert alert-info">
+                                <i class="bi bi-info-circle me-2"></i>
+                                <strong>CSV Format:</strong> Two columns with ISL gloss words in first column and video filenames in second column.
+                                
+                                <div class="mt-2">
+                                    <pre class="mb-0 small">gloss,video_file
+NAMASTE,namaste.mp4
+THANK-YOU,thankyou.mp4</pre>
+                                </div>
+                            </div>
+                            
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-upload me-2"></i> Upload Mapping
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- How It Works -->
+        <div class="row">
+            <div class="col-md-12 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">How to Use Custom Data</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4 mb-3 text-center">
+                                <div class="rounded-circle bg-primary p-3 d-inline-block mb-2">
+                                    <i class="bi bi-translate text-white fs-4"></i>
+                                </div>
+                                <h5>1. Upload Translations</h5>
+                                <p>Upload your CSV file with English to ISL gloss mappings</p>
+                            </div>
+                            <div class="col-md-4 mb-3 text-center">
+                                <div class="rounded-circle bg-primary p-3 d-inline-block mb-2">
+                                    <i class="bi bi-camera-video text-white fs-4"></i>
+                                </div>
+                                <h5>2. Upload Videos</h5>
+                                <p>Upload your sign language video files</p>
+                            </div>
+                            <div class="col-md-4 mb-3 text-center">
+                                <div class="rounded-circle bg-primary p-3 d-inline-block mb-2">
+                                    <i class="bi bi-link text-white fs-4"></i>
+                                </div>
+                                <h5>3. Map Videos to Gloss</h5>
+                                <p>Upload a CSV mapping gloss words to video filenames</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-dark text-center py-3 mt-5">
+        <p class="text-muted mb-0">Voice to Indian Sign Language Translator &copy; 2025</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // File drop area functionality for Gloss CSV
+            const glossDropArea = document.getElementById('glossDropArea');
+            const glossCsvFile = document.getElementById('glossCsvFile');
+            const glossFileName = document.getElementById('glossFileName');
+            
+            // File drop area functionality for Videos
+            const videosDropArea = document.getElementById('videosDropArea');
+            const videoFiles = document.getElementById('videoFiles');
+            const videoFileNames = document.getElementById('videoFileNames');
+            
+            // File drop area functionality for Mapping CSV
+            const mappingDropArea = document.getElementById('mappingDropArea');
+            const mappingCsvFile = document.getElementById('mappingCsvFile');
+            const mappingFileName = document.getElementById('mappingFileName');
+            
+            // Setup drop area for gloss CSV
+            setupFileDropArea(glossDropArea, glossCsvFile, glossFileName, false);
+            
+            // Setup drop area for videos
+            setupFileDropArea(videosDropArea, videoFiles, videoFileNames, true);
+            
+            // Setup drop area for mapping CSV
+            setupFileDropArea(mappingDropArea, mappingCsvFile, mappingFileName, false);
+            
+            function setupFileDropArea(dropArea, fileInput, fileNameDisplay, allowMultiple) {
+                // Click on drop area to trigger file input
+                dropArea.addEventListener('click', () => {
+                    fileInput.click();
+                });
+                
+                // Handle file selection
+                fileInput.addEventListener('change', () => {
+                    updateFileList(fileInput, fileNameDisplay);
+                });
+                
+                // Prevent default drag behaviors
+                ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                    dropArea.addEventListener(eventName, preventDefaults, false);
+                    document.body.addEventListener(eventName, preventDefaults, false);
+                });
+                
+                // Highlight drop area when item is dragged over it
+                ['dragenter', 'dragover'].forEach(eventName => {
+                    dropArea.addEventListener(eventName, () => {
+                        dropArea.classList.add('highlight');
+                    }, false);
+                });
+                
+                ['dragleave', 'drop'].forEach(eventName => {
+                    dropArea.addEventListener(eventName, () => {
+                        dropArea.classList.remove('highlight');
+                    }, false);
+                });
+                
+                // Handle dropped files
+                dropArea.addEventListener('drop', (e) => {
+                    let dt = e.dataTransfer;
+                    if (allowMultiple) {
+                        fileInput.files = dt.files;
+                    } else {
+                        // Only use the first file if multiple are dropped
+                        const newFileList = new DataTransfer();
+                        newFileList.items.add(dt.files[0]);
+                        fileInput.files = newFileList.files;
+                    }
+                    updateFileList(fileInput, fileNameDisplay);
+                }, false);
+                
+                function updateFileList(fileInput, fileNameDisplay) {
+                    if (fileInput.files.length > 0) {
+                        if (fileInput.files.length === 1) {
+                            fileNameDisplay.textContent = `Selected file: ${fileInput.files[0].name}`;
+                        } else {
+                            fileNameDisplay.textContent = `Selected ${fileInput.files.length} files`;
+                            
+                            // If showing multiple files, list them
+                            const fileList = document.createElement('ul');
+                            fileList.className = 'mt-2 text-start';
+                            
+                            Array.from(fileInput.files).forEach(file => {
+                                const item = document.createElement('li');
+                                item.textContent = file.name;
+                                fileList.appendChild(item);
+                            });
+                            
+                            fileNameDisplay.appendChild(fileList);
+                        }
+                    } else {
+                        fileNameDisplay.textContent = '';
+                    }
+                }
+                
+                function preventDefaults(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+            }
+        });
+    </script>
+</body>
+</html>

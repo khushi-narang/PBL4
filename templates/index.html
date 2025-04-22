@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Indian Sign Language Translator</title>
+    <link rel="stylesheet" href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
+</head>
+<body>
+    <div class="container mt-4">
+        <header class="text-center mb-5">
+            <h1 class="display-4">Voice to Indian Sign Language Translator</h1>
+            <p class="lead">Speak into your microphone and see the Indian Sign Language equivalent</p>
+        </header>
+
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="bi bi-mic"></i> Voice Input
+                        </h5>
+                        <div>
+                            <a href="{{ url_for('history') }}" class="btn btn-sm btn-outline-secondary">
+                                <i class="bi bi-clock-history"></i> History
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="text-center mb-4" id="recordingStatus">
+                            <p id="status">Click "Start Recording" and speak clearly</p>
+                            <canvas id="audioVisualizer" width="300" height="60" class="mb-3"></canvas>
+                        </div>
+                        
+                        <div class="d-flex justify-content-center gap-2">
+                            <button id="startBtn" class="btn btn-primary">
+                                <i class="bi bi-mic-fill"></i> Start Recording
+                            </button>
+                            <button id="stopBtn" class="btn btn-danger" disabled>
+                                <i class="bi bi-stop-fill"></i> Stop Recording
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-footer text-center">
+                        <div id="processingDiv" class="d-none">
+                            <div class="spinner-border spinner-border-sm text-primary me-2" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <span>Processing audio...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="bi bi-translate"></i> Translation Results
+                        </h5>
+                        <div id="saveBtn" class="d-none">
+                            <button class="btn btn-sm btn-outline-success" id="saveTranslationBtn">
+                                <i class="bi bi-save"></i> Save
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div id="resultsDiv" class="d-none">
+                            <div class="mb-3">
+                                <label for="recognizedText" class="form-label fw-bold">Recognized Text:</label>
+                                <div id="recognizedText" class="p-2 bg-dark rounded border"></div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="glossText" class="form-label fw-bold">ISL Gloss:</label>
+                                <div id="glossText" class="p-2 bg-dark rounded border"></div>
+                            </div>
+                        </div>
+                        
+                        <div id="noResultsDiv" class="text-center p-4">
+                            <i class="bi bi-info-circle"></i> 
+                            Record your voice to see the results here
+                        </div>
+                        
+                        <div id="errorDiv" class="d-none alert alert-danger" role="alert">
+                            <i class="bi bi-exclamation-triangle-fill"></i>
+                            <span id="errorMessage"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="bi bi-camera-video"></i> Sign Language Videos
+                </h5>
+            </div>
+            <div class="card-body">
+                <div id="videosDiv" class="row video-container d-none">
+                    <!-- Videos will be dynamically added here -->
+                </div>
+                
+                <div id="noVideosDiv" class="text-center p-5">
+                    <p>Record your voice to see sign language videos</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">How It Works</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3 mb-3 text-center">
+                                <div class="rounded-circle bg-primary p-3 d-inline-block mb-2">
+                                    <i class="bi bi-mic-fill text-white fs-4"></i>
+                                </div>
+                                <h5>1. Speak</h5>
+                                <p>Record your voice using the microphone</p>
+                            </div>
+                            <div class="col-md-3 mb-3 text-center">
+                                <div class="rounded-circle bg-primary p-3 d-inline-block mb-2">
+                                    <i class="bi bi-soundwave text-white fs-4"></i>
+                                </div>
+                                <h5>2. Convert</h5>
+                                <p>Your speech is converted to text</p>
+                            </div>
+                            <div class="col-md-3 mb-3 text-center">
+                                <div class="rounded-circle bg-primary p-3 d-inline-block mb-2">
+                                    <i class="bi bi-translate text-white fs-4"></i>
+                                </div>
+                                <h5>3. Translate</h5>
+                                <p>Text is translated to ISL gloss format</p>
+                            </div>
+                            <div class="col-md-3 mb-3 text-center">
+                                <div class="rounded-circle bg-primary p-3 d-inline-block mb-2">
+                                    <i class="bi bi-hand-index-thumb text-white fs-4"></i>
+                                </div>
+                                <h5>4. Sign</h5>
+                                <p>Watch the corresponding sign language videos</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-dark text-center py-3 mt-5">
+        <p class="text-muted mb-0">Voice to Indian Sign Language Translator &copy; 2025</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/audio_recorder.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
